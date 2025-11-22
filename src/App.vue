@@ -176,9 +176,7 @@ const readPerformanceTransferSize = (absoluteUrl: string): number | null => {
     if (resource.transferSize && resource.transferSize > 0) {
       return resource.transferSize
     }
-    if (resource.decodedBodySize && resource.decodedBodySize > 0) {
-      return resource.decodedBodySize
-    }
+    // 当 transferSize 为 0（缓存命中）时，不使用 encoded/decoded 体积，改由 HEAD 结果获取准确文件大小
   }
   return null
 }
