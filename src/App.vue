@@ -30,7 +30,7 @@ const nowRelative = () => {
   return Date.now() - bootstrapEpoch
 }
 
-const textureBasePath = 'https://cdn.rainnnn.com/maps'
+const textureBasePath = 'https://cdn.rainnnn.com/map2'
 const modelUrl = 'https://cdn.rainnnn.com/models/model11221021.glb'
 const envMapPath = 'https://cdn.rainnnn.com/hdr/studio_small_08_1k.hdr'
 
@@ -434,7 +434,8 @@ const buildMaterialForMesh = async (
     roughness: 1,
     envMapIntensity: 1.2
   })
-  candidate.normalScale.set(1, 1)
+  // Flip Y to match baked normal/height orientation
+  candidate.normalScale.set(1, -1)
 
   await Promise.all(
     textureMeta.map(async ({ suffix, targets, colorSpace }) => {
