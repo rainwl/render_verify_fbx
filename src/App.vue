@@ -31,8 +31,9 @@ const nowRelative = () => {
   return Date.now() - bootstrapEpoch
 }
 
-const assetBasePath = '/ThreeJS_ORM_Instance1'
-const envMapPath = '/model001_model_fbx/studio_small_08_1k.hdr'
+const textureBasePath = 'https://cdn.rainnnn.com/textures'
+const modelUrl = 'https://cdn.rainnnn.com/models/gearpump20251111.fbx'
+const envMapPath = 'https://cdn.rainnnn.com/hdr/studio_small_08_1k.hdr'
 
 type TextureChannel = 'BaseColor' | 'Normal' | 'ORM'
 type TextureManifest = Record<
@@ -382,7 +383,7 @@ const buildMaterialForMesh = async (
     textureMeta.map(async ({ suffix, targets, srgb }) => {
       const fileName = manifestInfo.textures[suffix]
       if (!fileName) return
-      const texturePath = `${assetBasePath}/${manifestInfo.partKey}/${fileName}`
+      const texturePath = `${textureBasePath}/${manifestInfo.partKey}/${fileName}`
       try {
         const tex = await loadTexture(texturePath, srgb ?? false)
         targets.forEach((target) => {
@@ -464,7 +465,7 @@ const loadFbx = () =>
       return
     }
     const loader = new FBXLoader(loadingManager)
-    const modelPath = `${assetBasePath}/gearpump20251111.fbx`
+    const modelPath = modelUrl
     markModelLoadStart()
     loader.load(
       modelPath,
