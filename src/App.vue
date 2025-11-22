@@ -129,6 +129,8 @@ let textureLoadStart: number | null = null
 let modelLoadStart: number | null = null
 let modelSizeRecorded = false
 let hasRenderedFirstFrame = false
+// 为避免额外 HEAD/Range 请求增加等待时间，默认仅使用 performance 数据，不再回源探测大小
+const enableSizeProbeFallback = false
 
 const resetLoadTracking = () => {
   loadMetrics.value = {
@@ -230,7 +232,7 @@ const recordAssetSize = async (type: 'model' | 'texture', path: string) => {
   const knownSize =
     assetSizeCache.get(absoluteUrl) ??
     readPerformanceTransferSize(absoluteUrl) ??
-    (await fetchContentLength(absoluteUrl))
+    (enableSizeProbeFallback ? await fetchContentLength(absoluteUrl) : null)
   if (typeof knownSize === 'number' && knownSize > 0) {
     assetSizeCache.set(absoluteUrl, knownSize)
     if (type === 'model') {
