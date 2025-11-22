@@ -40,10 +40,11 @@ type TextureManifest = Record<
   string,
   Record<string, Partial<Record<TextureChannel, string>>>
 >
+type TextureColorSpace = 'srgb' | 'linear' | 'none'
 type TextureMetaItem = {
   suffix: TextureChannel
   targets: Array<'map' | 'normalMap' | 'roughnessMap' | 'metalnessMap' | 'aoMap'>
-  srgb?: boolean
+  colorSpace?: TextureColorSpace
 }
 
 const manifestData = textureManifest as TextureManifest
@@ -54,9 +55,9 @@ const manifestPartMeta = Object.keys(manifestData).map((key) => ({
 }))
 
 const textureMeta: TextureMetaItem[] = [
-  { suffix: 'BaseColor', targets: ['map'], srgb: true },
-  { suffix: 'Normal', targets: ['normalMap'] },
-  { suffix: 'ORM', targets: ['aoMap', 'roughnessMap', 'metalnessMap'] }
+  { suffix: 'BaseColor', targets: ['map'], colorSpace: 'srgb' },
+  { suffix: 'Normal', targets: ['normalMap'], colorSpace: 'none' },
+  { suffix: 'ORM', targets: ['aoMap', 'roughnessMap', 'metalnessMap'], colorSpace: 'none' }
 ]
 
 const findPartKeyFromObject = (object?: THREE.Object3D | null): string | null => {
@@ -335,7 +336,13 @@ const disposeResources = () => {
   renderer = null
 }
 
-const loadTexture = (path: string, srgb = false) =>
+const resolveColorSpace = (type?: TextureColorSpace) => {
+  if (type === 'srgb') return THREE.SRGBColorSpace
+  if (type === 'linear') return THREE.LinearSRGBColorSpace
+  return THREE.NoColorSpace
+}
+
+const loadTexture = (path: string, colorSpace: TextureColorSpace = 'linear') =>
   new Promise<THREE.Texture>((resolve, reject) => {
     if (textureCache.has(path)) {
       resolve(textureCache.get(path) as THREE.Texture)
@@ -346,16 +353,16 @@ const loadTexture = (path: string, srgb = false) =>
       reject(new Error('Texture loader is not ready'))
       return
     }
-    markTextureLoadStart()
-    loader.load(
-      path,
-      (texture: THREE.Texture) => {
-        texture.colorSpace = srgb ? THREE.SRGBColorSpace : THREE.LinearSRGBColorSpace
-        texture.anisotropy = renderer?.capabilities.getMaxAnisotropy() ?? 1
-        textureCache.set(path, texture)
-        markTextureLoadEnd(path)
-        resolve(texture)
-      },
+      markTextureLoadStart()
+      loader.load(
+        path,
+        (texture: THREE.Texture) => {
+          texture.colorSpace = resolveColorSpace(colorSpace)
+          texture.anisotropy = renderer?.capabilities.getMaxAnisotropy() ?? 1
+          textureCache.set(path, texture)
+          markTextureLoadEnd(path)
+          resolve(texture)
+        },
       undefined,
       (event: ErrorEvent | unknown) => {
         markTextureLoadEnd(path)
@@ -376,14 +383,15 @@ const buildMaterialForMesh = async (
     roughness: 1,
     envMapIntensity: 1.2
   })
+  candidate.normalScale.set(1, 1)
 
   await Promise.all(
-    textureMeta.map(async ({ suffix, targets, srgb }) => {
+    textureMeta.map(async ({ suffix, targets, colorSpace }) => {
       const fileName = manifestInfo.textures[suffix]
       if (!fileName) return
       const texturePath = `${textureBasePath}/${manifestInfo.partKey}/${fileName}`
       try {
-        const tex = await loadTexture(texturePath, srgb ?? false)
+        const tex = await loadTexture(texturePath, colorSpace ?? 'linear')
         targets.forEach((target) => {
           ;(candidate as THREE.MeshStandardMaterial)[target] = tex
         })
@@ -549,7 +557,8 @@ const initScene = async () => {
   pmremGenerator.compileEquirectangularShader()
 
   scene = new THREE.Scene()
-  scene.background = new THREE.Color(0x050509)
+  // Light gray white background for a clean render backdrop
+  scene.background = new THREE.Color(0xf7f7f7)
 
   camera = new THREE.PerspectiveCamera(45, 1, 0.1, 500)
   camera.position.set(4, 2, 6)
@@ -575,18 +584,6 @@ const initScene = async () => {
   fillLight.position.set(-6, 5, -4)
   scene.add(fillLight)
 
-  const ground = new THREE.Mesh(
-    new THREE.CircleGeometry(30, 64).rotateX(-Math.PI / 2),
-    new THREE.MeshStandardMaterial({
-      color: 0x111119,
-      roughness: 0.95,
-      metalness: 0.05
-    })
-  )
-  ground.receiveShadow = true
-  ground.position.y = -0.01
-  scene.add(ground)
-
   ensureRendererSize()
   startResizeHandling()
 
@@ -594,6 +591,8 @@ const initScene = async () => {
   scene.environment = envMap
 
   const fbxModel = await loadFbx()
+  // Rotate model 90 degrees around X axis (clockwise)
+  fbxModel.rotation.x = -Math.PI / 2
   scene.add(fbxModel)
   fitCameraToObject(fbxModel)
 
