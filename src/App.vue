@@ -2,9 +2,8 @@
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
-import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js'
-import textureManifest from './assets/model-texture-manifest.json'
 
 const viewerRef = ref<HTMLDivElement | null>(null)
 const loading = ref(true)
@@ -31,15 +30,11 @@ const nowRelative = () => {
   return Date.now() - bootstrapEpoch
 }
 
-const textureBasePath = 'https://cdn.rainnnn.com/textures'
-const modelUrl = 'https://cdn.rainnnn.com/models/gearpump20251111.fbx'
+const textureBasePath = 'https://cdn.rainnnn.com/maps'
+const modelUrl = 'https://cdn.rainnnn.com/models/model11221021.glb'
 const envMapPath = 'https://cdn.rainnnn.com/hdr/studio_small_08_1k.hdr'
 
 type TextureChannel = 'BaseColor' | 'Normal' | 'ORM'
-type TextureManifest = Record<
-  string,
-  Record<string, Partial<Record<TextureChannel, string>>>
->
 type TextureColorSpace = 'srgb' | 'linear' | 'none'
 type TextureMetaItem = {
   suffix: TextureChannel
@@ -47,12 +42,7 @@ type TextureMetaItem = {
   colorSpace?: TextureColorSpace
 }
 
-const manifestData = textureManifest as TextureManifest
 const normalizeKey = (value: string) => value.replace(/[^a-z0-9_]/gi, '').toLowerCase()
-const manifestPartMeta = Object.keys(manifestData).map((key) => ({
-  original: key,
-  normalized: normalizeKey(key)
-}))
 
 const textureMeta: TextureMetaItem[] = [
   { suffix: 'BaseColor', targets: ['map'], colorSpace: 'srgb' },
@@ -60,54 +50,63 @@ const textureMeta: TextureMetaItem[] = [
   { suffix: 'ORM', targets: ['aoMap', 'roughnessMap', 'metalnessMap'], colorSpace: 'none' }
 ]
 
-const findPartKeyFromObject = (object?: THREE.Object3D | null): string | null => {
-  let current: THREE.Object3D | null | undefined = object
-  while (current) {
-    const name = current.name?.trim()
-    if (name) {
-      const normalizedName = normalizeKey(name)
-      const match = manifestPartMeta.find(
-        ({ normalized }) =>
-          normalizedName.startsWith(normalized) || normalizedName.includes(normalized)
-      )
-      if (match) {
-        return match.original
-      }
-    }
-    current = current.parent
-  }
-  return null
-}
-
 const extractVariantName = (value?: string | null) => {
   if (!value) return null
   const match = value.match(/mat[a-z0-9]+/i)
   return match ? match[0] : null
 }
 
-const resolveManifestInfo = (
-  mesh: THREE.Mesh,
-  materialName?: string
-): { partKey: string; textures: Partial<Record<TextureChannel, string>> } | null => {
-  const partKey = findPartKeyFromObject(mesh)
-  if (!partKey) return null
-  const partEntry = manifestData[partKey]
-  if (!partEntry) return null
-  const variantName =
-    extractVariantName(materialName) ?? extractVariantName(mesh.name) ?? null
-  const variantKey =
-    (variantName &&
-      Object.keys(partEntry).find(
-        (key) => normalizeKey(key) === normalizeKey(variantName)
-      )) ||
-    Object.keys(partEntry)[0]
-  if (!variantKey) return null
-  const textures = partEntry[variantKey]
-  if (!textures) return null
-  return {
-    partKey,
-    textures
+const sanitizeName = (value: string) =>
+  normalizeKey(value.replace(/\s+/g, '_').replace(/_low\b/g, ''))
+
+const extractPartKeyFromCandidate = (value?: string | null) => {
+  if (!value) return null
+  const sanitized = sanitizeName(value)
+  const tokens = sanitized.split('_').filter(Boolean)
+  const index = tokens.findIndex((t) => /^\d+$/.test(t))
+  if (index === -1) return null
+  const collected: string[] = []
+  for (let i = index; i < tokens.length; i++) {
+    const token = tokens[i]
+    if (!token) continue
+    if (token.startsWith('mat')) break
+    collected.push(token)
   }
+  if (collected.length >= 2) {
+    // 去掉末尾编号（例如 4_screw_1 -> 4_screw）
+    const joined = collected.join('_')
+    return joined.replace(/_\d+$/, '')
+  }
+  return null
+}
+
+const findPartKeyFromObject = (
+  object?: THREE.Object3D | null,
+  materialName?: string | null
+): string | null => {
+  const candidates: (string | undefined | null)[] = []
+  if (object?.name) candidates.push(object.name)
+  if (materialName) candidates.push(materialName)
+  let current = object?.parent
+  while (current) {
+    if (current.name) candidates.push(current.name)
+    current = current.parent
+  }
+  for (const candidate of candidates) {
+    const part = extractPartKeyFromCandidate(candidate)
+    if (part) return part
+  }
+  return null
+}
+
+const buildTextureFileName = (
+  partKey: string,
+  variant: string,
+  suffix: TextureChannel
+): string => {
+  const normalizedPart = partKey.replace(/_\d+$/, '')
+  const repeatPart = Array(4).fill(normalizedPart).join('_')
+  return `model11221021_${repeatPart}_${variant}_${suffix}.png`
 }
 
 let renderer: THREE.WebGLRenderer | null = null
@@ -131,6 +130,16 @@ let modelSizeRecorded = false
 let hasRenderedFirstFrame = false
 // 为避免额外 HEAD/Range 请求增加等待时间，默认仅使用 performance 数据，不再回源探测大小
 const enableSizeProbeFallback = false
+type TextureDebugEntry = {
+  path: string
+  status: 'success' | 'fail'
+  part?: string | null
+  variant?: string | null
+}
+const textureDebug = ref<TextureDebugEntry[]>([])
+const pushTextureDebug = (entry: TextureDebugEntry) => {
+  textureDebug.value = [...textureDebug.value.slice(-50), entry]
+}
 
 const resetLoadTracking = () => {
   loadMetrics.value = {
@@ -344,7 +353,12 @@ const resolveColorSpace = (type?: TextureColorSpace) => {
   return THREE.NoColorSpace
 }
 
-const loadTexture = (path: string, colorSpace: TextureColorSpace = 'linear') =>
+const loadTexture = (
+  path: string,
+  colorSpace: TextureColorSpace = 'linear',
+  partKey?: string | null,
+  variant?: string | null
+) =>
   new Promise<THREE.Texture>((resolve, reject) => {
     if (textureCache.has(path)) {
       resolve(textureCache.get(path) as THREE.Texture)
@@ -355,19 +369,22 @@ const loadTexture = (path: string, colorSpace: TextureColorSpace = 'linear') =>
       reject(new Error('Texture loader is not ready'))
       return
     }
-      markTextureLoadStart()
-      loader.load(
-        path,
-        (texture: THREE.Texture) => {
-          texture.colorSpace = resolveColorSpace(colorSpace)
-          texture.anisotropy = renderer?.capabilities.getMaxAnisotropy() ?? 1
-          textureCache.set(path, texture)
-          markTextureLoadEnd(path)
-          resolve(texture)
-        },
+    markTextureLoadStart()
+    loader.load(
+      path,
+      (texture: THREE.Texture) => {
+        texture.flipY = false
+        texture.colorSpace = resolveColorSpace(colorSpace)
+        texture.anisotropy = renderer?.capabilities.getMaxAnisotropy() ?? 1
+        textureCache.set(path, texture)
+        markTextureLoadEnd(path)
+        pushTextureDebug({ path, status: 'success', part: partKey, variant })
+        resolve(texture)
+      },
       undefined,
       (event: ErrorEvent | unknown) => {
         markTextureLoadEnd(path)
+        pushTextureDebug({ path, status: 'fail', part: partKey, variant })
         reject(event instanceof ErrorEvent ? event.error : event)
       }
     )
@@ -377,8 +394,12 @@ const buildMaterialForMesh = async (
   mesh: THREE.Mesh,
   materialName?: string
 ): Promise<THREE.MeshStandardMaterial | null> => {
-  const manifestInfo = resolveManifestInfo(mesh, materialName)
-  if (!manifestInfo) return null
+  const partKey = findPartKeyFromObject(mesh, materialName)
+  const variant =
+    extractVariantName(materialName) ??
+    extractVariantName(mesh.name) ??
+    extractVariantName(partKey ?? '') ??
+    'matMetal'
 
   const candidate = new THREE.MeshStandardMaterial({
     metalness: 1,
@@ -389,11 +410,11 @@ const buildMaterialForMesh = async (
 
   await Promise.all(
     textureMeta.map(async ({ suffix, targets, colorSpace }) => {
-      const fileName = manifestInfo.textures[suffix]
-      if (!fileName) return
-      const texturePath = `${textureBasePath}/${manifestInfo.partKey}/${fileName}`
+      if (!partKey) return
+      const fileName = buildTextureFileName(partKey, variant, suffix)
+      const texturePath = `${textureBasePath}/${fileName}`
       try {
-        const tex = await loadTexture(texturePath, colorSpace ?? 'linear')
+        const tex = await loadTexture(texturePath, colorSpace ?? 'linear', partKey, variant)
         targets.forEach((target) => {
           ;(candidate as THREE.MeshStandardMaterial)[target] = tex
         })
@@ -466,20 +487,21 @@ const loadEnvironmentMap = () =>
     )
   })
 
-const loadFbx = () =>
+const loadGlb = () =>
   new Promise<THREE.Group>((resolve, reject) => {
     if (!loadingManager) {
       reject(new Error('Loading manager is not initialized'))
       return
     }
-    const loader = new FBXLoader(loadingManager)
+    const loader = new GLTFLoader(loadingManager)
     const modelPath = modelUrl
     markModelLoadStart()
     loader.load(
       modelPath,
-      async (fbx: THREE.Group) => {
+      async (gltf) => {
+        const sceneObj = gltf.scene
         const applyTasks: Promise<void>[] = []
-        fbx.traverse((child: THREE.Object3D) => {
+        sceneObj.traverse((child: THREE.Object3D) => {
           if ((child as THREE.Mesh).isMesh) {
             applyTasks.push(applyMaterialsToMesh(child as THREE.Mesh))
           }
@@ -487,7 +509,7 @@ const loadFbx = () =>
         try {
           await Promise.all(applyTasks)
           markModelLoadEnd(modelPath)
-          resolve(fbx)
+          resolve(sceneObj)
         } catch (error) {
           reject(error)
         }
@@ -541,6 +563,7 @@ const initScene = async () => {
   }
 
   textureLoader = new THREE.TextureLoader(loadingManager)
+  textureLoader.setCrossOrigin('anonymous')
 
   renderer = new THREE.WebGLRenderer({
     antialias: true,
@@ -592,11 +615,10 @@ const initScene = async () => {
   const envMap = await loadEnvironmentMap()
   scene.environment = envMap
 
-  const fbxModel = await loadFbx()
-  // Rotate model 90 degrees around X axis (clockwise)
-  fbxModel.rotation.x = -Math.PI / 2
-  scene.add(fbxModel)
-  fitCameraToObject(fbxModel)
+  const glbModel = await loadGlb()
+  // Load model with original orientation
+  scene.add(glbModel)
+  fitCameraToObject(glbModel)
 
   animate()
 }
@@ -639,6 +661,17 @@ onBeforeUnmount(() => {
         <p>Time: {{ formatDuration(loadMetrics.textures.durationMs) }}</p>
         <p>Size: {{ formatBytes(loadMetrics.textures.sizeBytes) }}</p>
       </div>
+    </div>
+    <div class="debug-panel" v-if="textureDebug.length">
+      <p class="metric-title">Texture Debug (latest {{ textureDebug.length }})</p>
+      <ul>
+        <li v-for="(item, idx) in textureDebug" :key="idx">
+          <span :class="item.status">{{ item.status }}</span>
+          <span>{{ item.part || 'part?' }}</span>
+          <span>{{ item.variant || 'variant?' }}</span>
+          <span class="path">{{ item.path }}</span>
+        </li>
+      </ul>
     </div>
   </div>
 </template>
@@ -710,5 +743,46 @@ canvas {
   font-size: 0.75rem;
   letter-spacing: 0.2em;
   color: #8aa4ff;
+}
+
+.debug-panel {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  max-width: 420px;
+  max-height: 50vh;
+  overflow: auto;
+  background: rgba(0, 0, 0, 0.65);
+  color: #dfe3ff;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  border: 1px solid rgba(143, 171, 255, 0.25);
+  z-index: 3;
+}
+.debug-panel ul {
+  list-style: none;
+  margin: 0.25rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.debug-panel li {
+  display: grid;
+  grid-template-columns: 64px 110px 110px 1fr;
+  gap: 0.35rem;
+  align-items: center;
+}
+.debug-panel .success {
+  color: #7de38d;
+}
+.debug-panel .fail {
+  color: #ff7b7b;
+}
+.debug-panel .path {
+  color: #cfd8ff;
+  word-break: break-all;
 }
 </style>
