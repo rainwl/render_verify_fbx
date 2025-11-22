@@ -31,22 +31,17 @@ const nowRelative = () => {
   return Date.now() - bootstrapEpoch
 }
 
-const assetBasePath = '/model001_model_fbx'
+const assetBasePath = '/ThreeJS_ORM_Instance1'
+const envMapPath = '/model001_model_fbx/studio_small_08_1k.hdr'
 
-type TextureChannel = 'BaseColor' | 'Normal' | 'Roughness' | 'Metallic' | 'Emissive' | 'Height'
+type TextureChannel = 'BaseColor' | 'Normal' | 'ORM'
 type TextureManifest = Record<
   string,
   Record<string, Partial<Record<TextureChannel, string>>>
 >
 type TextureMetaItem = {
   suffix: TextureChannel
-  target:
-    | 'map'
-    | 'normalMap'
-    | 'roughnessMap'
-    | 'metalnessMap'
-    | 'emissiveMap'
-    | 'displacementMap'
+  targets: Array<'map' | 'normalMap' | 'roughnessMap' | 'metalnessMap' | 'aoMap'>
   srgb?: boolean
 }
 
@@ -58,12 +53,9 @@ const manifestPartMeta = Object.keys(manifestData).map((key) => ({
 }))
 
 const textureMeta: TextureMetaItem[] = [
-  { suffix: 'BaseColor', target: 'map', srgb: true },
-  { suffix: 'Normal', target: 'normalMap' },
-  { suffix: 'Roughness', target: 'roughnessMap' },
-  { suffix: 'Metallic', target: 'metalnessMap' },
-  { suffix: 'Emissive', target: 'emissiveMap', srgb: true },
-  { suffix: 'Height', target: 'displacementMap' }
+  { suffix: 'BaseColor', targets: ['map'], srgb: true },
+  { suffix: 'Normal', targets: ['normalMap'] },
+  { suffix: 'ORM', targets: ['aoMap', 'roughnessMap', 'metalnessMap'] }
 ]
 
 const findPartKeyFromObject = (object?: THREE.Object3D | null): string | null => {
@@ -203,7 +195,7 @@ const fetchContentLength = async (absoluteUrl: string): Promise<number | null> =
       }
     }
   } catch (error) {
-    console.warn('HEAD 请求读取资源大小失败', error)
+    console.warn('HEAD request failed while probing asset size', error)
   }
   try {
     const rangeResponse = await fetch(absoluteUrl, {
@@ -222,7 +214,7 @@ const fetchContentLength = async (absoluteUrl: string): Promise<number | null> =
       }
     }
   } catch (error) {
-    console.warn('Range 请求读取资源大小失败', error)
+    console.warn('Range request failed while probing asset size', error)
   }
   return null
 }
@@ -286,9 +278,9 @@ const markTextureLoadEnd = (path: string) => {
 const formatDuration = (value: number | null) => {
   if (value === null) return '--'
   if (value < 1000) {
-    return value.toFixed(0) + ' 毫秒'
+    return value.toFixed(0) + ' ms'
   }
-  return (value / 1000).toFixed(2) + ' 秒'
+  return (value / 1000).toFixed(2) + ' s'
 }
 
 const formatBytes = (value: number | null) => {
@@ -352,7 +344,7 @@ const loadTexture = (path: string, srgb = false) =>
     }
     const loader = textureLoader
     if (!loader) {
-      reject(new Error('纹理加载器未初始化'))
+      reject(new Error('Texture loader is not ready'))
       return
     }
     markTextureLoadStart()
@@ -381,28 +373,26 @@ const buildMaterialForMesh = async (
   if (!manifestInfo) return null
 
   const candidate = new THREE.MeshStandardMaterial({
-    metalness: 0.4,
-    roughness: 0.65,
+    metalness: 1,
+    roughness: 1,
     envMapIntensity: 1.2
   })
 
   await Promise.all(
-    textureMeta.map(async ({ suffix, target, srgb }) => {
+    textureMeta.map(async ({ suffix, targets, srgb }) => {
       const fileName = manifestInfo.textures[suffix]
       if (!fileName) return
       const texturePath = `${assetBasePath}/${manifestInfo.partKey}/${fileName}`
       try {
         const tex = await loadTexture(texturePath, srgb ?? false)
-        ;(candidate as THREE.MeshStandardMaterial)[target] = tex
-        if (target === 'displacementMap') {
-          candidate.displacementScale = 0.002
-        }
-        if (target === 'emissiveMap') {
-          candidate.emissive = new THREE.Color(0xffffff)
-          candidate.emissiveIntensity = 1
+        targets.forEach((target) => {
+          ;(candidate as THREE.MeshStandardMaterial)[target] = tex
+        })
+        if (targets.includes('aoMap')) {
+          candidate.aoMapIntensity = 1
         }
       } catch (error) {
-        console.warn(`贴图缺失，已跳过 ${texturePath}`, error)
+        console.warn(`Texture load failed: ${texturePath}`, error)
       }
     })
   )
@@ -410,9 +400,20 @@ const buildMaterialForMesh = async (
   return candidate
 }
 
+const ensureUv2ForAo = (mesh: THREE.Mesh) => {
+  const geometry = mesh.geometry as THREE.BufferGeometry | undefined
+  if (!geometry) return
+  const uv = geometry.getAttribute('uv') as THREE.BufferAttribute | undefined
+  const uv2 = geometry.getAttribute('uv2')
+  if (uv && !uv2) {
+    geometry.setAttribute('uv2', uv.clone())
+  }
+}
+
 const applyMaterialsToMesh = async (
   mesh: THREE.Mesh<THREE.BufferGeometry, THREE.Material | THREE.Material[]>
 ) => {
+  ensureUv2ForAo(mesh)
   mesh.castShadow = true
   mesh.receiveShadow = true
   if (Array.isArray(mesh.material)) {
@@ -440,12 +441,12 @@ const applyMaterialsToMesh = async (
 const loadEnvironmentMap = () =>
   new Promise<THREE.Texture>((resolve, reject) => {
     if (!renderer || !pmremGenerator || !loadingManager) {
-      reject(new Error('渲染器尚未准备好'))
+      reject(new Error('Renderer not ready for environment map'))
       return
     }
     const rgbeLoader = new RGBELoader(loadingManager)
     rgbeLoader.load(
-      `${assetBasePath}/studio_small_08_1k.hdr`,
+      envMapPath,
       (hdrTexture: THREE.DataTexture) => {
         const envTexture = pmremGenerator!.fromEquirectangular(hdrTexture).texture
         hdrTexture.dispose()
@@ -459,7 +460,7 @@ const loadEnvironmentMap = () =>
 const loadFbx = () =>
   new Promise<THREE.Group>((resolve, reject) => {
     if (!loadingManager) {
-      reject(new Error('加载管理器未初始化'))
+      reject(new Error('Loading manager is not initialized'))
       return
     }
     const loader = new FBXLoader(loadingManager)
@@ -510,7 +511,7 @@ const animate = () => {
 
 const initScene = async () => {
   if (!viewerRef.value) {
-    throw new Error('容器未准备好')
+    throw new Error('Viewer container is not mounted')
   }
 
   resetLoadTracking()
@@ -523,10 +524,10 @@ const initScene = async () => {
   }
   loadingManager.onError = (url: string) => {
     if (isCriticalAsset(url)) {
-      errorMessage.value = `资源加载失败：${url}`
+      errorMessage.value = `Critical asset failed: ${url}`
       loading.value = false
     } else {
-      console.warn(`非关键资源缺失：${url}`)
+      console.warn(`Non-critical asset failed: ${url}`)
     }
   }
 
@@ -603,7 +604,7 @@ const initScene = async () => {
 onMounted(() => {
   initScene().catch((error) => {
     loading.value = false
-    errorMessage.value = error instanceof Error ? error.message : '初始化失败'
+    errorMessage.value = error instanceof Error ? error.message : 'Unknown error, check console'
     console.error(error)
   })
 })
@@ -616,7 +617,7 @@ onBeforeUnmount(() => {
 <template>
   <div class="viewer" ref="viewerRef">
     <div class="overlay" v-if="loading">
-      <p>模型与贴图加载中...</p>
+      <p>Loading assets...</p>
       <p>{{ progress }}%</p>
     </div>
     <div class="overlay error" v-else-if="errorMessage">
@@ -624,19 +625,19 @@ onBeforeUnmount(() => {
     </div>
     <div class="metrics-panel">
       <div class="metric-block highlight">
-        <p class="metric-title">总加载</p>
-        <p>耗时：{{ formatDuration(loadMetrics.total.durationMs) }}</p>
-        <p>资源：{{ formatBytes(loadMetrics.total.sizeBytes) }}</p>
+        <p class="metric-title">Total</p>
+        <p>Time: {{ formatDuration(loadMetrics.total.durationMs) }}</p>
+        <p>Size: {{ formatBytes(loadMetrics.total.sizeBytes) }}</p>
       </div>
       <div class="metric-block">
-        <p class="metric-title">模型</p>
-        <p>耗时：{{ formatDuration(loadMetrics.model.durationMs) }}</p>
-        <p>大小：{{ formatBytes(loadMetrics.model.sizeBytes) }}</p>
+        <p class="metric-title">Model</p>
+        <p>Time: {{ formatDuration(loadMetrics.model.durationMs) }}</p>
+        <p>Size: {{ formatBytes(loadMetrics.model.sizeBytes) }}</p>
       </div>
       <div class="metric-block">
-        <p class="metric-title">贴图</p>
-        <p>耗时：{{ formatDuration(loadMetrics.textures.durationMs) }}</p>
-        <p>大小：{{ formatBytes(loadMetrics.textures.sizeBytes) }}</p>
+        <p class="metric-title">Textures</p>
+        <p>Time: {{ formatDuration(loadMetrics.textures.durationMs) }}</p>
+        <p>Size: {{ formatBytes(loadMetrics.textures.sizeBytes) }}</p>
       </div>
     </div>
   </div>

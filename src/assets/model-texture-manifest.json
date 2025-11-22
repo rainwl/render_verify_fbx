@@ -2,357 +2,240 @@
   "10_screw": {
     "matMetal": {
       "BaseColor": "10_screw_low_matMetal_BaseColor.png",
-      "Emissive": "10_screw_low_matMetal_Emissive.png",
-      "Height": "10_screw_low_matMetal_Height.png",
-      "Metallic": "10_screw_low_matMetal_Metallic.png",
       "Normal": "10_screw_low_matMetal_Normal.png",
-      "Roughness": "10_screw_low_matMetal_Roughness.png"
+      "ORM": "10_screw_low_matMetal_ORM.png"
     },
     "matPaint": {
       "BaseColor": "10_screw_low_matPaint_BaseColor.png",
-      "Emissive": "10_screw_low_matPaint_Emissive.png",
-      "Height": "10_screw_low_matPaint_Height.png",
-      "Metallic": "10_screw_low_matPaint_Metallic.png",
       "Normal": "10_screw_low_matPaint_Normal.png",
-      "Roughness": "10_screw_low_matPaint_Roughness.png"
+      "ORM": "10_screw_low_matPaint_ORM.png"
     }
   },
   "11_screw": {
     "matMetal": {
       "BaseColor": "11_screw_low_matMetal_BaseColor.png",
-      "Emissive": "11_screw_low_matMetal_Emissive.png",
-      "Height": "11_screw_low_matMetal_Height.png",
-      "Metallic": "11_screw_low_matMetal_Metallic.png",
       "Normal": "11_screw_low_matMetal_Normal.png",
-      "Roughness": "11_screw_low_matMetal_Roughness.png"
+      "ORM": "11_screw_low_matMetal_ORM.png"
     },
     "matPaint": {
       "BaseColor": "11_screw_low_matPaint_BaseColor.png",
-      "Emissive": "11_screw_low_matPaint_Emissive.png",
-      "Height": "11_screw_low_matPaint_Height.png",
-      "Metallic": "11_screw_low_matPaint_Metallic.png",
       "Normal": "11_screw_low_matPaint_Normal.png",
-      "Roughness": "11_screw_low_matPaint_Roughness.png"
+      "ORM": "11_screw_low_matPaint_ORM.png"
     }
   },
   "12_screw": {
     "matMetal": {
       "BaseColor": "12_screw_low_matMetal_BaseColor.png",
-      "Emissive": "12_screw_low_matMetal_Emissive.png",
-      "Height": "12_screw_low_matMetal_Height.png",
-      "Metallic": "12_screw_low_matMetal_Metallic.png",
       "Normal": "12_screw_low_matMetal_Normal.png",
-      "Roughness": "12_screw_low_matMetal_Roughness.png"
+      "ORM": "12_screw_low_matMetal_ORM.png"
     },
     "matPaint": {
       "BaseColor": "12_screw_low_matPaint_BaseColor.png",
-      "Emissive": "12_screw_low_matPaint_Emissive.png",
-      "Height": "12_screw_low_matPaint_Height.png",
-      "Metallic": "12_screw_low_matPaint_Metallic.png",
       "Normal": "12_screw_low_matPaint_Normal.png",
-      "Roughness": "12_screw_low_matPaint_Roughness.png"
+      "ORM": "12_screw_low_matPaint_ORM.png"
     }
   },
   "13_screw": {
     "matMetal": {
       "BaseColor": "13_screw_low_matMetal_BaseColor.png",
-      "Emissive": "13_screw_low_matMetal_Emissive.png",
-      "Height": "13_screw_low_matMetal_Height.png",
-      "Metallic": "13_screw_low_matMetal_Metallic.png",
       "Normal": "13_screw_low_matMetal_Normal.png",
-      "Roughness": "13_screw_low_matMetal_Roughness.png"
+      "ORM": "13_screw_low_matMetal_ORM.png"
     },
     "matPaint": {
       "BaseColor": "13_screw_low_matPaint_BaseColor.png",
-      "Emissive": "13_screw_low_matPaint_Emissive.png",
-      "Height": "13_screw_low_matPaint_Height.png",
-      "Metallic": "13_screw_low_matPaint_Metallic.png",
       "Normal": "13_screw_low_matPaint_Normal.png",
-      "Roughness": "13_screw_low_matPaint_Roughness.png"
+      "ORM": "13_screw_low_matPaint_ORM.png"
     }
   },
   "14_gland_nut": {
     "matMetal": {
       "BaseColor": "14_glant_nut_low_matMetal_BaseColor.png",
-      "Emissive": "14_glant_nut_low_matMetal_Emissive.png",
-      "Height": "14_glant_nut_low_matMetal_Height.png",
-      "Metallic": "14_glant_nut_low_matMetal_Metallic.png",
       "Normal": "14_glant_nut_low_matMetal_Normal.png",
-      "Roughness": "14_glant_nut_low_matMetal_Roughness.png"
+      "ORM": "14_glant_nut_low_matMetal_ORM.png"
     },
     "matPaint": {
       "BaseColor": "14_glant_nut_low_matPaint_BaseColor.png",
-      "Emissive": "14_glant_nut_low_matPaint_Emissive.png",
-      "Height": "14_glant_nut_low_matPaint_Height.png",
-      "Metallic": "14_glant_nut_low_matPaint_Metallic.png",
       "Normal": "14_glant_nut_low_matPaint_Normal.png",
-      "Roughness": "14_glant_nut_low_matPaint_Roughness.png"
+      "ORM": "14_glant_nut_low_matPaint_ORM.png"
     }
   },
   "15_gland": {
     "matMetal": {
       "BaseColor": "15_gland_low_matMetal_BaseColor.png",
-      "Emissive": "15_gland_low_matMetal_Emissive.png",
-      "Height": "15_gland_low_matMetal_Height.png",
-      "Metallic": "15_gland_low_matMetal_Metallic.png",
       "Normal": "15_gland_low_matMetal_Normal.png",
-      "Roughness": "15_gland_low_matMetal_Roughness.png"
+      "ORM": "15_gland_low_matMetal_ORM.png"
     }
   },
   "16_brasque": {
     "matRubber": {
       "BaseColor": "16_brasque_low_matRubber_BaseColor.png",
-      "Emissive": "16_brasque_low_matRubber_Emissive.png",
-      "Height": "16_brasque_low_matRubber_Height.png",
-      "Metallic": "16_brasque_low_matRubber_Metallic.png",
       "Normal": "16_brasque_low_matRubber_Normal.png",
-      "Roughness": "16_brasque_low_matRubber_Roughness.png"
+      "ORM": "16_brasque_low_matRubber_ORM.png"
     }
   },
   "17_front_pump_cover": {
     "matMetal": {
       "BaseColor": "17_front_pump_cover_low_matMetal_BaseColor.png",
-      "Emissive": "17_front_pump_cover_low_matMetal_Emissive.png",
-      "Height": "17_front_pump_cover_low_matMetal_Height.png",
-      "Metallic": "17_front_pump_cover_low_matMetal_Metallic.png",
       "Normal": "17_front_pump_cover_low_matMetal_Normal.png",
-      "Roughness": "17_front_pump_cover_low_matMetal_Roughness.png"
+      "ORM": "17_front_pump_cover_low_matMetal_ORM.png"
     },
     "matPaint": {
       "BaseColor": "17_front_pump_cover_low_matPaint_BaseColor.png",
-      "Emissive": "17_front_pump_cover_low_matPaint_Emissive.png",
-      "Height": "17_front_pump_cover_low_matPaint_Height.png",
-      "Metallic": "17_front_pump_cover_low_matPaint_Metallic.png",
       "Normal": "17_front_pump_cover_low_matPaint_Normal.png",
-      "Roughness": "17_front_pump_cover_low_matPaint_Roughness.png"
+      "ORM": "17_front_pump_cover_low_matPaint_ORM.png"
     }
   },
   "18_back_pump_cover": {
     "matMetal": {
       "BaseColor": "18_back_pump_cover_low_matMetal_BaseColor.png",
-      "Emissive": "18_back_pump_cover_low_matMetal_Emissive.png",
-      "Height": "18_back_pump_cover_low_matMetal_Height.png",
-      "Metallic": "18_back_pump_cover_low_matMetal_Metallic.png",
       "Normal": "18_back_pump_cover_low_matMetal_Normal.png",
-      "Roughness": "18_back_pump_cover_low_matMetal_Roughness.png"
+      "ORM": "18_back_pump_cover_low_matMetal_ORM.png"
     },
     "matPaint": {
       "BaseColor": "18_back_pump_cover_low_matPaint_BaseColor.png",
-      "Emissive": "18_back_pump_cover_low_matPaint_Emissive.png",
-      "Height": "18_back_pump_cover_low_matPaint_Height.png",
-      "Metallic": "18_back_pump_cover_low_matPaint_Metallic.png",
       "Normal": "18_back_pump_cover_low_matPaint_Normal.png",
-      "Roughness": "18_back_pump_cover_low_matPaint_Roughness.png"
+      "ORM": "18_back_pump_cover_low_matPaint_ORM.png"
     }
   },
   "19_key_bar": {
     "matMetal": {
       "BaseColor": "19_key_bar_low_matMetal_BaseColor.png",
-      "Emissive": "19_key_bar_low_matMetal_Emissive.png",
-      "Height": "19_key_bar_low_matMetal_Height.png",
-      "Metallic": "19_key_bar_low_matMetal_Metallic.png",
       "Normal": "19_key_bar_low_matMetal_Normal.png",
-      "Roughness": "19_key_bar_low_matMetal_Roughness.png"
+      "ORM": "19_key_bar_low_matMetal_ORM.png"
     }
   },
   "1_nut": {
     "matMetal": {
       "BaseColor": "1_nut_low_matMetal_BaseColor.png",
-      "Emissive": "1_nut_low_matMetal_Emissive.png",
-      "Height": "1_nut_low_matMetal_Height.png",
-      "Metallic": "1_nut_low_matMetal_Metallic.png",
       "Normal": "1_nut_low_matMetal_Normal.png",
-      "Roughness": "1_nut_low_matMetal_Roughness.png"
+      "ORM": "1_nut_low_matMetal_ORM.png"
     },
     "matPaint": {
       "BaseColor": "1_nut_low_matPaint_BaseColor.png",
-      "Emissive": "1_nut_low_matPaint_Emissive.png",
-      "Height": "1_nut_low_matPaint_Height.png",
-      "Metallic": "1_nut_low_matPaint_Metallic.png",
       "Normal": "1_nut_low_matPaint_Normal.png",
-      "Roughness": "1_nut_low_matPaint_Roughness.png"
+      "ORM": "1_nut_low_matPaint_ORM.png"
     }
   },
   "20_driving_gear_shaft": {
     "matMetal": {
       "BaseColor": "20_driving_gear_shaft_low_matMetal_BaseColor.png",
-      "Emissive": "20_driving_gear_shaft_low_matMetal_Emissive.png",
-      "Height": "20_driving_gear_shaft_low_matMetal_Height.png",
-      "Metallic": "20_driving_gear_shaft_low_matMetal_Metallic.png",
       "Normal": "20_driving_gear_shaft_low_matMetal_Normal.png",
-      "Roughness": "20_driving_gear_shaft_low_matMetal_Roughness.png"
+      "ORM": "20_driving_gear_shaft_low_matMetal_ORM.png"
     }
   },
   "21_passive_gear_shaft": {
     "matMetal": {
       "BaseColor": "21_passive_gear_shaft_low_matMetal_BaseColor.png",
-      "Emissive": "21_passive_gear_shaft_low_matMetal_Emissive.png",
-      "Height": "21_passive_gear_shaft_low_matMetal_Height.png",
-      "Metallic": "21_passive_gear_shaft_low_matMetal_Metallic.png",
       "Normal": "21_passive_gear_shaft_low_matMetal_Normal.png",
-      "Roughness": "21_passive_gear_shaft_low_matMetal_Roughness.png"
+      "ORM": "21_passive_gear_shaft_low_matMetal_ORM.png"
     }
   },
   "22_pump_body": {
     "matMetal": {
       "BaseColor": "22_pump_body_low_matMetal_BaseColor.png",
-      "Emissive": "22_pump_body_low_matMetal_Emissive.png",
-      "Height": "22_pump_body_low_matMetal_Height.png",
-      "Metallic": "22_pump_body_low_matMetal_Metallic.png",
       "Normal": "22_pump_body_low_matMetal_Normal.png",
-      "Roughness": "22_pump_body_low_matMetal_Roughness.png"
+      "ORM": "22_pump_body_low_matMetal_ORM.png"
     },
     "matPaint": {
       "BaseColor": "22_pump_body_low_matPaint_BaseColor.png",
-      "Emissive": "22_pump_body_low_matPaint_Emissive.png",
-      "Height": "22_pump_body_low_matPaint_Height.png",
-      "Metallic": "22_pump_body_low_matPaint_Metallic.png",
       "Normal": "22_pump_body_low_matPaint_Normal.png",
-      "Roughness": "22_pump_body_low_matPaint_Roughness.png"
+      "ORM": "22_pump_body_low_matPaint_ORM.png"
     }
   },
   "2_screw": {
     "matMetal": {
       "BaseColor": "2_screw_low_matMetal_BaseColor.png",
-      "Emissive": "2_screw_low_matMetal_Emissive.png",
-      "Height": "2_screw_low_matMetal_Height.png",
-      "Metallic": "2_screw_low_matMetal_Metallic.png",
       "Normal": "2_screw_low_matMetal_Normal.png",
-      "Roughness": "2_screw_low_matMetal_Roughness.png"
+      "ORM": "2_screw_low_matMetal_ORM.png"
     },
     "matPaint": {
       "BaseColor": "2_screw_low_matPaint_BaseColor.png",
-      "Emissive": "2_screw_low_matPaint_Emissive.png",
-      "Height": "2_screw_low_matPaint_Height.png",
-      "Metallic": "2_screw_low_matPaint_Metallic.png",
       "Normal": "2_screw_low_matPaint_Normal.png",
-      "Roughness": "2_screw_low_matPaint_Roughness.png"
+      "ORM": "2_screw_low_matPaint_ORM.png"
     }
   },
   "3_screw": {
     "matMetal": {
       "BaseColor": "3_screw_low_matMetal_BaseColor.png",
-      "Emissive": "3_screw_low_matMetal_Emissive.png",
-      "Height": "3_screw_low_matMetal_Height.png",
-      "Metallic": "3_screw_low_matMetal_Metallic.png",
       "Normal": "3_screw_low_matMetal_Normal.png",
-      "Roughness": "3_screw_low_matMetal_Roughness.png"
+      "ORM": "3_screw_low_matMetal_ORM.png"
     },
     "matPaint": {
       "BaseColor": "3_screw_low_matPaint_BaseColor.png",
-      "Emissive": "3_screw_low_matPaint_Emissive.png",
-      "Height": "3_screw_low_matPaint_Height.png",
-      "Metallic": "3_screw_low_matPaint_Metallic.png",
       "Normal": "3_screw_low_matPaint_Normal.png",
-      "Roughness": "3_screw_low_matPaint_Roughness.png"
+      "ORM": "3_screw_low_matPaint_ORM.png"
     }
   },
   "4_screw": {
     "matMetal": {
       "BaseColor": "4_screw_low_matMetal_BaseColor.png",
-      "Emissive": "4_screw_low_matMetal_Emissive.png",
-      "Height": "4_screw_low_matMetal_Height.png",
-      "Metallic": "4_screw_low_matMetal_Metallic.png",
       "Normal": "4_screw_low_matMetal_Normal.png",
-      "Roughness": "4_screw_low_matMetal_Roughness.png"
+      "ORM": "4_screw_low_matMetal_ORM.png"
     },
     "matPaint": {
       "BaseColor": "4_screw_low_matPaint_BaseColor.png",
-      "Emissive": "4_screw_low_matPaint_Emissive.png",
-      "Height": "4_screw_low_matPaint_Height.png",
-      "Metallic": "4_screw_low_matPaint_Metallic.png",
       "Normal": "4_screw_low_matPaint_Normal.png",
-      "Roughness": "4_screw_low_matPaint_Roughness.png"
+      "ORM": "4_screw_low_matPaint_ORM.png"
     }
   },
   "5_screw": {
     "matMetal": {
       "BaseColor": "5_screw_low_matMetal_BaseColor.png",
-      "Emissive": "5_screw_low_matMetal_Emissive.png",
-      "Height": "5_screw_low_matMetal_Height.png",
-      "Metallic": "5_screw_low_matMetal_Metallic.png",
       "Normal": "5_screw_low_matMetal_Normal.png",
-      "Roughness": "5_screw_low_matMetal_Roughness.png"
+      "ORM": "5_screw_low_matMetal_ORM.png"
     },
     "matPaint": {
       "BaseColor": "5_screw_low_matPaint_BaseColor.png",
-      "Emissive": "5_screw_low_matPaint_Emissive.png",
-      "Height": "5_screw_low_matPaint_Height.png",
-      "Metallic": "5_screw_low_matPaint_Metallic.png",
       "Normal": "5_screw_low_matPaint_Normal.png",
-      "Roughness": "5_screw_low_matPaint_Roughness.png"
+      "ORM": "5_screw_low_matPaint_ORM.png"
     }
   },
   "6_screw": {
     "matMetal": {
       "BaseColor": "6_screw_low_matMetal_BaseColor.png",
-      "Emissive": "6_screw_low_matMetal_Emissive.png",
-      "Height": "6_screw_low_matMetal_Height.png",
-      "Metallic": "6_screw_low_matMetal_Metallic.png",
       "Normal": "6_screw_low_matMetal_Normal.png",
-      "Roughness": "6_screw_low_matMetal_Roughness.png"
+      "ORM": "6_screw_low_matMetal_ORM.png"
     },
     "matPaint": {
       "BaseColor": "6_screw_low_matPaint_BaseColor.png",
-      "Emissive": "6_screw_low_matPaint_Emissive.png",
-      "Height": "6_screw_low_matPaint_Height.png",
-      "Metallic": "6_screw_low_matPaint_Metallic.png",
       "Normal": "6_screw_low_matPaint_Normal.png",
-      "Roughness": "6_screw_low_matPaint_Roughness.png"
+      "ORM": "6_screw_low_matPaint_ORM.png"
     }
   },
   "7_screw": {
     "matMetal": {
       "BaseColor": "7_screw_low_matMetal_BaseColor.png",
-      "Emissive": "7_screw_low_matMetal_Emissive.png",
-      "Height": "7_screw_low_matMetal_Height.png",
-      "Metallic": "7_screw_low_matMetal_Metallic.png",
       "Normal": "7_screw_low_matMetal_Normal.png",
-      "Roughness": "7_screw_low_matMetal_Roughness.png"
+      "ORM": "7_screw_low_matMetal_ORM.png"
     },
     "matPaint": {
       "BaseColor": "7_screw_low_matPaint_BaseColor.png",
-      "Emissive": "7_screw_low_matPaint_Emissive.png",
-      "Height": "7_screw_low_matPaint_Height.png",
-      "Metallic": "7_screw_low_matPaint_Metallic.png",
       "Normal": "7_screw_low_matPaint_Normal.png",
-      "Roughness": "7_screw_low_matPaint_Roughness.png"
+      "ORM": "7_screw_low_matPaint_ORM.png"
     }
   },
   "8_screw": {
     "matMetal": {
       "BaseColor": "8_screw_low_matMetal_BaseColor.png",
-      "Emissive": "8_screw_low_matMetal_Emissive.png",
-      "Height": "8_screw_low_matMetal_Height.png",
-      "Metallic": "8_screw_low_matMetal_Metallic.png",
       "Normal": "8_screw_low_matMetal_Normal.png",
-      "Roughness": "8_screw_low_matMetal_Roughness.png"
+      "ORM": "8_screw_low_matMetal_ORM.png"
     },
     "matPaint": {
       "BaseColor": "8_screw_low_matPaint_BaseColor.png",
-      "Emissive": "8_screw_low_matPaint_Emissive.png",
-      "Height": "8_screw_low_matPaint_Height.png",
-      "Metallic": "8_screw_low_matPaint_Metallic.png",
       "Normal": "8_screw_low_matPaint_Normal.png",
-      "Roughness": "8_screw_low_matPaint_Roughness.png"
+      "ORM": "8_screw_low_matPaint_ORM.png"
     }
   },
   "9_screw": {
     "matMetal": {
       "BaseColor": "9_screw_low_matMetal_BaseColor.png",
-      "Emissive": "9_screw_low_matMetal_Emissive.png",
-      "Height": "9_screw_low_matMetal_Height.png",
-      "Metallic": "9_screw_low_matMetal_Metallic.png",
       "Normal": "9_screw_low_matMetal_Normal.png",
-      "Roughness": "9_screw_low_matMetal_Roughness.png"
+      "ORM": "9_screw_low_matMetal_ORM.png"
     },
     "matPaint": {
       "BaseColor": "9_screw_low_matPaint_BaseColor.png",
-      "Emissive": "9_screw_low_matPaint_Emissive.png",
-      "Height": "9_screw_low_matPaint_Height.png",
-      "Metallic": "9_screw_low_matPaint_Metallic.png",
       "Normal": "9_screw_low_matPaint_Normal.png",
-      "Roughness": "9_screw_low_matPaint_Roughness.png"
+      "ORM": "9_screw_low_matPaint_ORM.png"
     }
   }
 }
