@@ -128,8 +128,11 @@ let textureLoadStart: number | null = null
 let modelLoadStart: number | null = null
 let modelSizeRecorded = false
 let hasRenderedFirstFrame = false
-// 为避免额外 HEAD/Range 请求增加等待时间，默认仅使用 performance 数据，不再回源探测大小
 const enableSizeProbeFallback = false
+const showDebugPanel = ref(false)
+let glbRoot: THREE.Object3D | null = null
+const originalPositions = new Map<THREE.Object3D, THREE.Vector3>()
+const exploded = ref(false)
 type TextureDebugEntry = {
   path: string
   status: 'success' | 'fail'
@@ -140,7 +143,6 @@ const textureDebug = ref<TextureDebugEntry[]>([])
 const pushTextureDebug = (entry: TextureDebugEntry) => {
   textureDebug.value = [...textureDebug.value.slice(-50), entry]
 }
-
 const resetLoadTracking = () => {
   loadMetrics.value = {
     total: { durationMs: null, sizeBytes: null },
@@ -312,6 +314,32 @@ const isCriticalAsset = (url: string) => {
   return (
     normalized.includes('gearpump20251111.fbx') || normalized.includes('studio_small_08_1k.hdr')
   )
+}
+
+const toggleExplode = (state: boolean) => {
+  if (!glbRoot) return
+  const box = new THREE.Box3().setFromObject(glbRoot)
+  const center = box.getCenter(new THREE.Vector3())
+  const magnitude = box.getSize(new THREE.Vector3()).length() * 0.08
+  glbRoot.traverse((child: THREE.Object3D) => {
+    if (!(child as THREE.Mesh).isMesh) return
+    if (!originalPositions.has(child)) {
+      originalPositions.set(child, child.position.clone())
+    }
+    const original = originalPositions.get(child)
+    if (!original) return
+    if (!state) {
+      child.position.copy(original)
+      return
+    }
+    const dir = child.position.clone().sub(center)
+    if (dir.lengthSq() === 0) {
+      dir.set(Math.random() * 0.5 + 0.1, Math.random() * 0.5 + 0.1, Math.random() * 0.5 + 0.1)
+    }
+    dir.normalize().multiplyScalar(magnitude)
+    child.position.copy(original.clone().add(dir))
+  })
+  exploded.value = state
 }
 
 const ensureRendererSize = () => {
@@ -591,7 +619,7 @@ const initScene = async () => {
   controls = new OrbitControls(camera, renderer.domElement)
   controls.enableDamping = true
   controls.dampingFactor = 0.05
-  controls.minDistance = 2
+  controls.minDistance = 0.6
   controls.maxDistance = 30
   controls.maxPolarAngle = Math.PI * 0.48
 
@@ -616,6 +644,7 @@ const initScene = async () => {
   scene.environment = envMap
 
   const glbModel = await loadGlb()
+  glbRoot = glbModel
   // Load model with original orientation
   scene.add(glbModel)
   fitCameraToObject(glbModel)
@@ -638,6 +667,9 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="viewer" ref="viewerRef">
+    <div class="ui-buttons">
+      <button class="action-btn" @click="toggleExplode(!exploded)">爆炸视图</button>
+    </div>
     <div class="overlay" v-if="loading">
       <p>Loading assets...</p>
       <p>{{ progress }}%</p>
@@ -662,7 +694,7 @@ onBeforeUnmount(() => {
         <p>Size: {{ formatBytes(loadMetrics.textures.sizeBytes) }}</p>
       </div>
     </div>
-    <div class="debug-panel" v-if="textureDebug.length">
+    <div class="debug-panel" v-if="showDebugPanel && textureDebug.length">
       <p class="metric-title">Texture Debug (latest {{ textureDebug.length }})</p>
       <ul>
         <li v-for="(item, idx) in textureDebug" :key="idx">
@@ -745,6 +777,27 @@ canvas {
   color: #8aa4ff;
 }
 
+.ui-buttons {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  gap: 0.5rem;
+  z-index: 4;
+}
+.action-btn {
+  padding: 0.45rem 0.85rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(30, 35, 50, 0.88);
+  color: #dfe3ff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.action-btn:hover {
+  background: rgba(60, 70, 95, 0.95);
+}
+
 .debug-panel {
   position: absolute;
   right: 1rem;
@@ -786,3 +839,6 @@ canvas {
   word-break: break-all;
 }
 </style>
+
+
+
