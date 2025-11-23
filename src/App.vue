@@ -31,7 +31,7 @@ const nowRelative = () => {
   return Date.now() - bootstrapEpoch
 }
 
-const textureBasePath = 'https://cdn.rainnnn.com/ktx/v1'
+const textureBasePath = 'https://cdn.rainnnn.com/ktx/v2'
 const modelUrl = 'https://cdn.rainnnn.com/glb/model.glb'
 const envMapPath = 'https://cdn.rainnnn.com/hdr/studio_small_08_1k.hdr'
 
