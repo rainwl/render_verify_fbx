@@ -4,6 +4,7 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js'
+import { KTX2Loader } from 'three/examples/jsm/loaders/KTX2Loader.js'
 
 const viewerRef = ref<HTMLDivElement | null>(null)
 const loading = ref(true)
@@ -30,8 +31,8 @@ const nowRelative = () => {
   return Date.now() - bootstrapEpoch
 }
 
-const textureBasePath = 'https://cdn.rainnnn.com/map2'
-const modelUrl = 'https://cdn.rainnnn.com/models/model11221021.glb'
+const textureBasePath = 'https://cdn.rainnnn.com/ktx/v1'
+const modelUrl = 'https://cdn.rainnnn.com/glb/model.glb'
 const envMapPath = 'https://cdn.rainnnn.com/hdr/studio_small_08_1k.hdr'
 
 type TextureChannel = 'BaseColor' | 'Normal' | 'ORM'
@@ -99,14 +100,18 @@ const findPartKeyFromObject = (
   return null
 }
 
-const buildTextureFileName = (
-  partKey: string,
-  variant: string,
-  suffix: TextureChannel
-): string => {
-  const normalizedPart = partKey.replace(/_\d+$/, '')
-  const repeatPart = Array(4).fill(normalizedPart).join('_')
-  return `model11221021_${repeatPart}_${variant}_${suffix}.png`
+const variantFileNameMap: Record<string, string> = {
+  matmetal: 'MatMetal',
+  matpaint: 'MatPaint',
+  matrubber: 'matRubber'
+}
+const resolveVariantKey = (variant?: string | null) => {
+  const normalized = normalizeKey(variant ?? '')
+  return normalized || 'matmetal'
+}
+const buildSharedTextureFileName = (variantKey: string, suffix: TextureChannel): string => {
+  const variantName = variantFileNameMap[variantKey] ?? variantKey
+  return `model_${variantName}_${suffix}.ktx2`
 }
 
 let renderer: THREE.WebGLRenderer | null = null
@@ -119,6 +124,7 @@ let resizeObserver: ResizeObserver | null = null
 let handleResize: (() => void) | null = null
 let loadingManager: THREE.LoadingManager | null = null
 let textureLoader: THREE.TextureLoader | null = null
+let ktx2Loader: KTX2Loader | null = null
 
 const textureCache = new Map<string, THREE.Texture>()
 const assetSizeCache = new Map<string, number>()
@@ -365,6 +371,7 @@ const disposeResources = () => {
   resizeObserver?.disconnect()
   controls?.dispose()
   pmremGenerator?.dispose()
+  ktx2Loader?.dispose?.()
   textureCache.forEach((texture) => texture.dispose())
   textureCache.clear()
   renderer?.dispose()
@@ -392,7 +399,8 @@ const loadTexture = (
       resolve(textureCache.get(path) as THREE.Texture)
       return
     }
-    const loader = textureLoader
+    const isKtx2 = path.toLowerCase().endsWith('.ktx2')
+    const loader = isKtx2 ? ktx2Loader : textureLoader
     if (!loader) {
       reject(new Error('Texture loader is not ready'))
       return
@@ -401,9 +409,11 @@ const loadTexture = (
     loader.load(
       path,
       (texture: THREE.Texture) => {
-        texture.flipY = false
         texture.colorSpace = resolveColorSpace(colorSpace)
         texture.anisotropy = renderer?.capabilities.getMaxAnisotropy() ?? 1
+        if (!isKtx2) {
+          texture.flipY = false
+        }
         textureCache.set(path, texture)
         markTextureLoadEnd(path)
         pushTextureDebug({ path, status: 'success', part: partKey, variant })
@@ -423,11 +433,10 @@ const buildMaterialForMesh = async (
   materialName?: string
 ): Promise<THREE.MeshStandardMaterial | null> => {
   const partKey = findPartKeyFromObject(mesh, materialName)
-  const variant =
-    extractVariantName(materialName) ??
-    extractVariantName(mesh.name) ??
-    extractVariantName(partKey ?? '') ??
-    'matMetal'
+  const variantRaw =
+    extractVariantName(materialName) ?? extractVariantName(mesh.name) ?? extractVariantName(partKey)
+  const variantKey = resolveVariantKey(variantRaw)
+  const variantLabel = variantFileNameMap[variantKey] ?? variantKey
 
   const candidate = new THREE.MeshStandardMaterial({
     metalness: 1,
@@ -439,11 +448,10 @@ const buildMaterialForMesh = async (
 
   await Promise.all(
     textureMeta.map(async ({ suffix, targets, colorSpace }) => {
-      if (!partKey) return
-      const fileName = buildTextureFileName(partKey, variant, suffix)
+      const fileName = buildSharedTextureFileName(variantKey, suffix)
       const texturePath = `${textureBasePath}/${fileName}`
       try {
-        const tex = await loadTexture(texturePath, colorSpace ?? 'linear', partKey, variant)
+        const tex = await loadTexture(texturePath, colorSpace ?? 'linear', partKey, variantLabel)
         targets.forEach((target) => {
           ;(candidate as THREE.MeshStandardMaterial)[target] = tex
         })
@@ -603,6 +611,11 @@ const initScene = async () => {
   renderer.shadowMap.type = THREE.PCFSoftShadowMap
   renderer.toneMapping = THREE.ACESFilmicToneMapping
   renderer.toneMappingExposure = 1.15
+
+  ktx2Loader = new KTX2Loader(loadingManager)
+    .setTranscoderPath('https://cdn.jsdelivr.net/npm/three@0.159/examples/jsm/libs/basis/')
+    .detectSupport(renderer)
+  ktx2Loader.setCrossOrigin?.('anonymous')
 
   const container = viewerRef.value
   container.appendChild(renderer.domElement)
